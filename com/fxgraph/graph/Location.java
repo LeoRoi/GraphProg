@@ -2,6 +2,9 @@ package com.fxgraph.graph;
 
 import java.io.Serializable;
 
+/**
+ * X & Y coordinates for save & load sake
+ */
 public class Location implements Serializable {
     double x;
     double y;

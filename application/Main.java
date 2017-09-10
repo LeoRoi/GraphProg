@@ -19,22 +19,40 @@ import javafx.stage.Stage;
 import com.fxgraph.layout.base.Layout;
 import com.fxgraph.layout.random.RegularLayout;
 import utils.AlertBox;
+import utils.Dijkstra;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+/*
+Created in IntelliJ IDEA 2017.1.4
+so it may not run in other IDEs
+ */
+
+/**
+ * Main class with {@link Application} for JavaFX
+ * @autor Konstantin K. 559121
+ * @autor Andrej L. 557966
+ */
 public class Main extends Application {
 
-    private Insets PADDING_INSETS = new Insets(15, 0, 0, 0);
-    private double SPACING_SETTING = 20D;
-    private double MAX_WIDTH_TEXT_FIELD = 250D;
-    private double MAX_WIDTH_BUTTON = 100D;
-    private double MAX_HEIGHT_BUTTON = 40D;
+    private final Insets PADDING_INSETS = new Insets(15, 0, 0, 0);
+    private final double SPACING_SETTING = 20D;
+    private final double MAX_WIDTH_TEXT_FIELD = 250D;
+    private final double MAX_WIDTH_BUTTON = 100D;
+    private final double MAX_HEIGHT_BUTTON = 40D;
 
     // main ui elements
     VBox root;
-    Graph graph;
+    public Graph graph;
+
+    //weightMenu
+    HBox wMenu;
+    TextField wInitial, wDistant;
+    Button wButton;
+    Label wLabel;
 
     // arrow prompts
     HBox arrowPromptsHbox;
@@ -62,10 +80,13 @@ public class Main extends Application {
 
     // random prompts
     private HBox randomPromptsHbox;
-    private TextField textField1RandomPrompts;
+    private TextField textField1RandomPrompts, textField2RandomPrompts;
     private Button randomButton;
 
-
+    /**
+     * Method that gets resources and launch the main scene
+     * @param primaryStage to display a scene
+     */
     @Override
     public void start(Stage primaryStage) {
         graph = new Graph();
@@ -77,15 +98,20 @@ public class Main extends Application {
         Scene scene = new Scene(root, 1024, 768);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
 
+        primaryStage.setTitle("GraphProg");
         primaryStage.setScene(scene);
         primaryStage.show();
 
         addGraphComponents();
 
+        //set random coordinates for default nodes
         Layout layout = new RegularLayout(graph);
         layout.execute();
     }
 
+    /**
+     * place control elements
+     */
     private void addPrompts() {
 
         // set root
@@ -94,15 +120,15 @@ public class Main extends Application {
         root.setSpacing(SPACING_SETTING);
         root.getChildren().add(graph.getScrollPane());
 
-//        // create arrow prompts
+        // create arrow prompts
         createArrowPrompts();
         setArrowPromptsListeners();
-//
-//        // delete arrow prompts
+
+        // delete arrow prompts
         createDeleteArrowPrompts();
         setDeleteArrowPromptsListeners();
-//
-//        // save prompts
+
+        // save prompts
         createSavePrompts();
         setSavePromptsListeners();
 
@@ -114,8 +140,77 @@ public class Main extends Application {
         createRandomPrompts();
         setRandomPromptsListeners();
 
+        //shortest path
+        createWeightPrompts();
+        weightListener();
     }
 
+    /**
+     * calculate shortest path
+     */
+    private void weightListener(){
+        Model model = graph.getModel();
+        wButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                String start = wInitial.getText().trim();
+                String end = wDistant.getText().trim();
+
+                if(cellCheck(model, start) && cellCheck(model, end)) {
+                    List<Connection> c = model.getAllConnections();
+
+                    //compose a map
+                    Dijkstra.Edge[] tree = new Dijkstra.Edge[c.size()];
+                    for (int i = 0; i < c.size(); i++)
+                        tree[i] = new Dijkstra.Edge(c.get(i).getSource().getCellId(), c.get(i).getTarget().getCellId(), Integer.parseInt(c.get(i).getText()));
+
+                    Dijkstra path = new Dijkstra(tree);
+                    path.dijkstra(start);
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();
+                    System.setOut(new PrintStream(output));
+                    path.printPath(end);
+
+                    //update gui
+                    if(path.ok) {
+                        graph.beginUpdate();
+                        wLabel.setText("Shortest path: " + output.toString());
+                        //System.out.println("ByteStream: " + output.toString());
+                        graph.endUpdate();
+                    }
+                }
+                else {
+                    wLabel.setVisible(false);
+                    AlertBox.display("Input error", "Please check start and end nodes!");
+                }
+            }
+        });
+    }
+
+    private void createWeightPrompts() {
+        wMenu = new HBox();
+        wMenu.setPadding(PADDING_INSETS);
+        wMenu.setSpacing(SPACING_SETTING);
+
+        wInitial = new TextField();
+        wInitial.setMaxWidth(MAX_WIDTH_TEXT_FIELD);
+        wInitial.setPromptText("Start node");
+
+        wButton = new Button();
+        wButton.setMaxWidth(MAX_WIDTH_BUTTON);
+        wButton.setMaxHeight(MAX_HEIGHT_BUTTON);
+        wButton.setText("Show path");
+
+        wDistant = new TextField();
+        wDistant.setMaxWidth(MAX_WIDTH_TEXT_FIELD);
+        wDistant.setPromptText("Destination node");
+
+        wLabel = new Label();
+        wLabel.setMaxWidth(MAX_WIDTH_TEXT_FIELD);
+        //wLabel.setText("Shortest path: ");
+
+        wMenu.getChildren().addAll(wInitial, wButton, wDistant, wLabel);
+        root.getChildren().addAll(wMenu);
+    }
 
     private void createArrowPrompts() {
         arrowPromptsHbox = new HBox();
@@ -130,6 +225,7 @@ public class Main extends Application {
         connectButton.setMaxWidth(MAX_WIDTH_BUTTON);
         connectButton.setMaxHeight(MAX_HEIGHT_BUTTON);
         connectButton.setText("Connect");
+        connectButton.setOnAction( e -> intCheck(textField3ArrowPrompts) );
 
         textField2ArrowPrompts = new TextField();
         textField2ArrowPrompts.setMaxWidth(MAX_WIDTH_TEXT_FIELD);
@@ -137,56 +233,56 @@ public class Main extends Application {
 
         textField3ArrowPrompts = new TextField();
         textField3ArrowPrompts.setMaxWidth(MAX_WIDTH_TEXT_FIELD + 200);
-        textField3ArrowPrompts.setPromptText("Choose the sign. 3 letters");
+        textField3ArrowPrompts.setPromptText("Path weight");
 
         arrowPromptsHbox.getChildren().addAll(textField1ArrowPrompts, connectButton, textField2ArrowPrompts, textField3ArrowPrompts);
         root.getChildren().addAll(arrowPromptsHbox);
+    }
+
+    private boolean intCheck(TextField input){
+        try {
+            int age = Integer.parseInt(input.getText());
+            return true;
+        }
+        catch(NumberFormatException e){
+            AlertBox.display("Input error", "Please enter a positive weight-integer!");
+            return false;
+        }
     }
 
     private void setArrowPromptsListeners() {
         connectButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                // take text from fields
-                String field1 = textField1ArrowPrompts.getText().trim();
-                String field2 = textField2ArrowPrompts.getText().trim();
-                String field3 = textField3ArrowPrompts.getText().trim();
+
+                // connection dialog
+                String field1 = textField1ArrowPrompts.getText().trim(); //from
+                String field2 = textField2ArrowPrompts.getText().trim(); //to
+                String field3 = textField3ArrowPrompts.getText().trim(); //weight
+
                 // get cells
                 Model model = graph.getModel();
-                RectangleCell rectangleCell1 = null;
-                RectangleCell rectangleCell2 = null;
-                if (field3.length() > 3) {
-                    AlertBox.display("Input error", "The sign should not be more than 3 letters");
-                } else {
-                    // find cell 1
-                    rectangleCell1 = (RectangleCell) model.getCell(field1);
-                    // find cell 2
-                    rectangleCell2 = (RectangleCell) model.getCell(field2);
+                RectangleCell rect1 = null;
+                RectangleCell rect2 = null;
 
+                if (field1.length() > 3 || field2.length() > 3) {
+                    AlertBox.display("Input error", "Maximal 3 letters allowed!");
                 }
-                // if cells were found
-                boolean found = false;
-                if (rectangleCell1 != null && rectangleCell2 != null) {
-                    // check if cells are already connected
-                    List<Connection> connections = model.getAllConnections();
-                    for (Connection connection : connections) {
-                        String presumedSource = rectangleCell1.getCellId();
-                        String presumedTarget = rectangleCell2.getCellId();
-                        String source = connection.getSource().getCellId();
-                        String target = connection.getTarget().getCellId();
-                        if ((presumedSource.equals(source) && presumedTarget.equals(target))
-                                || (presumedTarget.equals(source) && presumedSource.equals(target))) {
-                            found = true;
-                        }
-                    }
+                else {
+                    rect1 = (RectangleCell) model.getCell(field1);
+                    rect2 = (RectangleCell) model.getCell(field2);
                 }
-                // add cells
-                if (!found) {
+
+                // input was correct
+                if (rect1 != null && rect2 != null) {
+                    int stat;
+
                     graph.beginUpdate();
-                    model.addEdge(rectangleCell1.getCellId(), rectangleCell2.getCellId(), field3);
-                    graph.endUpdate();
-                } else {
-                    AlertBox.display("", "There is no such cell or they are already connected");
+                    stat = model.addEdgeS(rect1.getCellId(), rect2.getCellId(), field3);
+                    if (stat == 1)
+                        graph.endUpdate();
+                    else
+                        AlertBox.display("Trace error", "Cells not found or already connected!");
                 }
             }
         });
@@ -236,7 +332,7 @@ public class Main extends Application {
                     graph.beginUpdate();
                     graph.endUpdate();
                 } else if (counter == 0) {
-                    AlertBox.display("Error", "Try again");
+                    AlertBox.display("Input Error", "I don't get it!");
                 }
             }
         });
@@ -337,22 +433,23 @@ public class Main extends Application {
         });
     }
 
-
     private void createRandomPrompts() {
         randomPromptsHbox = new HBox();
         randomPromptsHbox.setPadding(PADDING_INSETS);
         randomPromptsHbox.setSpacing(SPACING_SETTING);
 
         textField1RandomPrompts = new TextField();
-        textField1RandomPrompts.setMinWidth(MAX_WIDTH_TEXT_FIELD + 30);
-        textField1RandomPrompts.setPromptText("Number of cells and arrows max 40 min 2");
+        textField1RandomPrompts.setPromptText("Number of cells [5, 10]");
+
+        textField2RandomPrompts = new TextField();
+        textField2RandomPrompts.setPromptText("Number of arrows");
 
         randomButton = new Button();
         randomButton.setMaxWidth(MAX_WIDTH_BUTTON);
         randomButton.setMaxHeight(MAX_HEIGHT_BUTTON);
         randomButton.setText("Randomize");
 
-        randomPromptsHbox.getChildren().addAll(textField1RandomPrompts, randomButton);
+        randomPromptsHbox.getChildren().addAll(textField1RandomPrompts, textField2RandomPrompts, randomButton);
         root.getChildren().addAll(randomPromptsHbox);
     }
 
@@ -361,64 +458,101 @@ public class Main extends Application {
             @Override
             public void handle(MouseEvent event) {
                 Model model = graph.getModel();
-                int cells = 5;
+                int cells = 4; //number of random cells
+                int edges = 1; //& edges by default
+                boolean error = false;
+
+                //get user input
                 try {
                     String one = textField1RandomPrompts.getText().trim();
-                    if (!one.equals("")) {
+                    String two = textField2RandomPrompts.getText().trim();
+                    if (!one.equals("") && !two.equals("")) {
                         cells = Integer.parseInt(textField1RandomPrompts.getText().trim());
+                        edges = Integer.parseInt(textField2RandomPrompts.getText().trim());
                     }
-                } catch (NumberFormatException e) {
+                }
+                catch (NumberFormatException e) {
                     e.printStackTrace();
-                    AlertBox.display("Error", "Please use whole numbers. Doing default randomizing");
+                    error = true;
                 }
 
-                if (cells < 41 && cells > 1) {
-                    Random rnd = new Random();
+                if(cells == 1 || error)
+                    AlertBox.display("Input Error", "U probably entered false numbers, so I take defaults!");
+
+                //add & distribute cells
+                if (cells < 11 && cells > 4) {
+                    double a = root.getWidth() / 4;
+                    double b = root.getHeight() / 4;
+                    double r = 4 * b / 5;
+
                     graph.clearUI();
                     List<RectangleCell> listOfCells = new ArrayList<>();
                     for (int i = 0; i < cells; i++) {
-                        // add cells and arrows
+                        // add cells
                         graph.beginUpdate();
-                        double x = rnd.nextDouble() * 500;
-                        double y = rnd.nextDouble() * 300;
+                        double j = 2 * Math.PI * i / cells;
+                        double x = (int) Math.round(a + r * Math.cos(j));
+                        double y = (int) Math.round(b + r * Math.sin(j));
                         RectangleCell cell = model.addCell(String.valueOf(i), TypeOfCell.RECTANGLE, x, y);
                         listOfCells.add(cell);
                         graph.endUpdate();
                     }
 
-                    for (int i = 0; i < listOfCells.size(); i=i+2) {
-                        if (i+2 <= listOfCells.size()) {
+                    //add connections
+                    if (edges < cells) {
+                        int counter = 0;
+                        while (counter != edges) {
                             graph.beginUpdate();
-                            model.addEdge(listOfCells.get(i).getCellId(), listOfCells.get(i+1).getCellId(), "");
+                            int i = mathRand(0, listOfCells.size() - 1);
+                            int j = mathRand(0, 9);
+                            counter += model.addEdgeS(listOfCells.get(i).getCellId(), listOfCells.get( j % listOfCells.size() ).getCellId(), Integer.toString(j));
                             graph.endUpdate();
                         }
-
                     }
-
-
-                } else {
-                    AlertBox.display("Error", "Max number of cells is 5. Number of arrows should not exceed number of cells");
+                    else
+                        AlertBox.display("Input Error", "Number of arrows should be lesser than number of cells!");
                 }
-
+                else
+                    AlertBox.display("Error", "Only numbers between 5 & 10 are allowed!");
             }
         });
+    }
 
+    /**
+     * random number generator
+     * @param min included
+     * @param max included
+     * @return number
+     */
+    static int mathRand(long min, long max) {
+        return (int)(min + Math.round( Math.random() * (max - min) ));
+    }
+
+    private boolean cellCheck(Model model, String name) {
+        for (Cell temp : model.getAllCells()) {
+            if (name.equals(temp.getCellId()))
+                return true;
+        }
+        return false;
     }
 
     private void addGraphComponents() {
-
         Model model = graph.getModel();
-
         graph.beginUpdate();
 
+        //default nodes, appear at once
         model.addCell("A", TypeOfCell.RECTANGLE, null, null);
         model.addCell("B", TypeOfCell.RECTANGLE, null, null);
+
+        /*
         model.addCell("C", TypeOfCell.RECTANGLE, null, null);
         model.addCell("D", TypeOfCell.RECTANGLE, null, null);
         model.addCell("E", TypeOfCell.RECTANGLE, null, null);
         model.addCell("F", TypeOfCell.RECTANGLE, null, null);
         model.addCell("G", TypeOfCell.RECTANGLE, null, null);
-
+        model.addCell("H", TypeOfCell.RECTANGLE, null, null);
+        model.addCell("I", TypeOfCell.RECTANGLE, null, null);
+        */
         graph.endUpdate();
 
         graph.getScrollPane().setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -427,24 +561,26 @@ public class Main extends Application {
                 if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
                     if (mouseEvent.getClickCount() == 2) {
                         System.out.println("Double clicked");
+
                         // get cell's name
                         AlertBox alertBox = new AlertBox();
                         alertBox.displayCellNameDialog();
                         String cellName = alertBox.getCellName();
-                        // prevent duplicated cells' names
+
+                        // prevent duplicates
                         int counter = 0;
                         if (cellName != null) {
-                            for (Cell cell : model.getAllCells()) {
-                                if (cellName.equals(cell.getCellId())) {
-                                    counter++;
-                                }
-                            }
+
+                            if (cellCheck(model, cellName))
+                                counter++;
+
                             if (cellName != null && counter == 0) {
                                 graph.beginUpdate();
                                 model.addCell(cellName, TypeOfCell.RECTANGLE, mouseEvent.getX() - 15, mouseEvent.getY() - 15);
                                 graph.endUpdate();
-                            } else {
-                                AlertBox.display("Error", "Cell already exists");
+                            }
+                            else {
+                                AlertBox.display("Error", "There is already a cell with that name!");
                             }
                         }
                     }
@@ -456,8 +592,4 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }
-
-
-

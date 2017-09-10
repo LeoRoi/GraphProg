@@ -7,32 +7,28 @@ import com.fxgraph.graph.Cell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.layout.base.Layout;
 
+/**
+ * places default nodes
+ * which u see after start
+ * without intelligence
+ */
 public class RegularLayout extends Layout {
-
     Graph graph;
-
     Random rnd = new Random();
 
     public RegularLayout(Graph graph) {
-
         this.graph = graph;
-
     }
 
     public void execute() {
-
         List<Cell> cells = graph.getModel().getAllCells();
 
         for (Cell cell : cells) {
-
             double x = rnd.nextDouble() * 300;
             double y = rnd.nextDouble() * 300;
             cell.setX(x);
             cell.setY(y);
             cell.relocate(x, y);
-
         }
-
     }
-
 }

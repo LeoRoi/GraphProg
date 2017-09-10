@@ -2,6 +2,9 @@ package com.fxgraph.graph;
 
 import java.io.Serializable;
 
+/**
+ * Data holder class for Edge instances
+ */
 public class EdgeWrapper implements Serializable {
     String source;
     String target;

@@ -8,6 +8,10 @@ import javafx.scene.input.MouseEvent;
 
 import java.util.List;
 
+/**
+ * allows to del nodes with mouse click
+ * drag & drop can be implemented in the future
+ */
 public class Gestures {
 
     final DragContext dragContext = new DragContext();
@@ -19,30 +23,25 @@ public class Gestures {
     }
 
     public void makeDeletable(final Node node) {
-
         node.setOnMousePressed(onMousePressedEventHandler);
-
     }
 
     public void makeDraggable(final Node node) {
         node.setOnMousePressed(onMousePressedEventHandler2);
         node.setOnMouseDragged(onMouseDraggedEventHandler);
         node.setOnMouseReleased(onMouseReleasedEventHandler);
-
     }
 
-
     EventHandler<MouseEvent> onMousePressedEventHandler = new EventHandler<MouseEvent>() {
-
         @Override
         public void handle(MouseEvent event) {
-
             Node node = (Node) event.getSource();
 
-//            double scale = graph.getScale();
-//
-//            dragContext.x = node.getBoundsInParent().getMinX() * scale - event.getScreenX();
-//            dragContext.y = node.getBoundsInParent().getMinY()  * scale - event.getScreenY();
+            /*
+            double scale = graph.getScale();
+            dragContext.x = node.getBoundsInParent().getMinX() * scale - event.getScreenX();
+            dragContext.y = node.getBoundsInParent().getMinY()  * scale - event.getScreenY();
+            */
 
             Model model = graph.getModel();
             // find and remove cell
@@ -62,30 +61,24 @@ public class Gestures {
             }
             graph.beginUpdate();
             graph.endUpdate();
-
         }
     };
 
     EventHandler<MouseEvent> onMousePressedEventHandler2 = new EventHandler<MouseEvent>() {
-
         @Override
         public void handle(MouseEvent event) {
-
             Node node = (Node) event.getSource();
 
             double scale = graph.getScale();
 
             dragContext.x = node.getBoundsInParent().getMinX() * scale - event.getScreenX();
             dragContext.y = node.getBoundsInParent().getMinY() * scale - event.getScreenY();
-
         }
     };
 
     EventHandler<MouseEvent> onMouseDraggedEventHandler = new EventHandler<MouseEvent>() {
-
         @Override
         public void handle(MouseEvent event) {
-
             Node node = (Node) event.getSource();
 
             double offsetX = event.getScreenX() + dragContext.x;
@@ -98,22 +91,17 @@ public class Gestures {
             offsetY /= scale;
 
             node.relocate(offsetX, offsetY);
-
         }
     };
 
     EventHandler<MouseEvent> onMouseReleasedEventHandler = new EventHandler<MouseEvent>() {
-
         @Override
         public void handle(MouseEvent event) {
-
         }
     };
-
 
     class DragContext {
         double x;
         double y;
-
     }
 }

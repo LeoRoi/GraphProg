@@ -7,6 +7,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.Scale;
 
+/**
+ * zoom feature
+ */
 public class CustomPane extends ScrollPane {
     Group zoomGroup;
     Scale scaleTransform;

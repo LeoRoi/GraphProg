@@ -11,6 +11,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * pop-up windows
+ * for warnings
+ */
 public class AlertBox {
 
     private static String cellName;

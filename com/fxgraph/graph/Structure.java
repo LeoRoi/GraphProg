@@ -3,6 +3,9 @@ package com.fxgraph.graph;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * nodes & edges for save & load sake
+ */
 public class Structure implements Serializable {
     List<String> listOfCellIds;
     List<EdgeWrapper> listOfEdges;

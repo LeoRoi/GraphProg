@@ -5,6 +5,9 @@ import javafx.scene.shape.Rectangle;
 
 import com.fxgraph.graph.Cell;
 
+/**
+ * node visual representation
+ */
 public class RectangleCell extends Cell {
 
     public RectangleCell(String id) {

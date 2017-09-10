@@ -13,17 +13,14 @@ import java.util.List;
 public class Graph {
 
     private Model model;
-
     private Group canvas;
-
     private CustomPane scrollPane;
-
     Gestures gestures;
 
     /**
-     * the pane wrapper is necessary or else the scrollpane would always align
+     * the pane wrapper is necessary or else the scroll-pane would always align
      * the top-most and left-most child to the top and left eg when you drag the
-     * top child down, the entire scrollpane would move down
+     * top child down, the entire scroll-pane would move down
      */
     CanvasChild canvasChild;
 
@@ -60,9 +57,17 @@ public class Graph {
         return model;
     }
 
+    /**
+     * logical gui update declaration with no functionality
+     * just to emphasize the start position in code
+     */
     public void beginUpdate() {
     }
 
+    /**
+     * actual functionality
+     * of gui update is here
+     */
     public void endUpdate() {
 
         // add components to graph pane
@@ -78,8 +83,7 @@ public class Graph {
             gestures.makeDeletable(cell);
         }
 
-        // every cell must have a parent, if it doesn't, then the graphParent is
-        // the parent
+        // every cell must have a parent, if it doesn't, then the graphParent is the parent
         getModel().attachOrphansToGraphParent(model.getAddedCells());
 
         // remove reference to graphParent
@@ -151,6 +155,5 @@ public class Graph {
         model.getRemovedConnections().addAll(model.getAllConnections());
         endUpdate();
         model.clear();
-
     }
 }

@@ -3,11 +3,16 @@ package com.fxgraph.graph;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
+/**
+ * node representation
+ * with coordinates & name
+ */
 public class Cell extends StackPane {
 
     String cellId;
@@ -49,10 +54,16 @@ public class Cell extends StackPane {
         if (id != null) {
             Text text = new Text(id);
             getChildren().addAll(view, text);
-        } else {
+
+            //how to automize???
+            if(text.getText().length() == 1) setStyle("-fx-font-size: 30pt");
+            if(text.getText().length() == 2) setStyle("-fx-font-size: 18pt");
+            if(text.getText().length() == 3) setStyle("-fx-font-size: 14pt");
+            //setAlignment(Pos.BOTTOM_CENTER);
+        }
+        else {
             getChildren().add(view);
         }
-
     }
 
     public Node getView() {

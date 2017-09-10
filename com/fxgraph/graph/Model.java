@@ -7,9 +7,12 @@ import java.util.Map;
 
 import com.fxgraph.cells.*;
 import com.sun.istack.internal.Nullable;
+import utils.AlertBox;
 
+/**
+ * data representation of cells and their connections
+ */
 public class Model {
-
     Cell graphParent;
 
     List<Cell> allCells;
@@ -20,18 +23,17 @@ public class Model {
     List<Connection> addedConnections;
     List<Connection> removedConnections;
 
-    Map<String, Cell> cellMap; // <id,cell>
+    //map of all the existing cells
+    // <id = key, cell = value>
+    Map<String, Cell> cellMap;
 
     public Model() {
-
         graphParent = new Cell("_ROOT_");
-
         // clear model, create lists
         clear();
     }
 
     public void clear() {
-
         allCells = new ArrayList<>();
         addedCells = new ArrayList<>();
         removedCells = new ArrayList<>();
@@ -73,7 +75,6 @@ public class Model {
     }
 
     public RectangleCell addCell(String id, TypeOfCell type, Double x, Double y) {
-
         switch (type) {
             case RECTANGLE:
                 RectangleCell rectangleCell = new RectangleCell(id);
@@ -90,21 +91,51 @@ public class Model {
     }
 
     private void addCell(Cell cell) {
-
         addedCells.add(cell);
-
         cellMap.put(cell.getCellId(), cell);
     }
 
     public void addEdge(String sourceId, String targetId, String text) {
-
         Cell sourceCell = cellMap.get(sourceId);
         Cell targetCell = cellMap.get(targetId);
 
         Connection connection = new Connection(sourceCell, targetCell, text);
-
         addedConnections.add(connection);
+    }
 
+    public int addEdgeS(String pSource, String pTarget, String weight) {
+        Cell pSourceCell = cellMap.get(pSource);
+        Cell pTargetCell = cellMap.get(pTarget);
+        boolean edge;
+
+        edge = conCheck(allConnections, pSource, pTarget);
+        if(edge)
+            return 0;
+
+        edge = conCheck(addedConnections, pSource, pTarget);
+        if(edge)
+            return 0;
+
+        Connection connection = new Connection(pSourceCell, pTargetCell, weight);
+        addedConnections.add(connection);
+        return 1;
+    }
+
+    private boolean conCheck(List<Connection> conList, String s, String e) {
+
+        //source & target the same cell?
+        if(s.equals(e))
+            return true;
+
+        //connection already exists?
+        for (Connection temp : conList) {
+            String source = temp.getSource().getCellId();
+            String target = temp.getTarget().getCellId();
+
+            if ((s.equals(source) && e.equals(target)))
+                return true;
+        }
+        return false;
     }
 
     /**
