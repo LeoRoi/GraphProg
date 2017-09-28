@@ -159,13 +159,13 @@ public class Main extends Application {
                 if(cellCheck(model, start) && cellCheck(model, end)) {
                     List<Connection> c = model.getAllConnections();
 
-                    //compose a map
+                    //compose an array & copy all connections
                     Dijkstra.Edge[] tree = new Dijkstra.Edge[c.size()];
                     for (int i = 0; i < c.size(); i++)
                         tree[i] = new Dijkstra.Edge(c.get(i).getSource().getCellId(), c.get(i).getTarget().getCellId(), Integer.parseInt(c.get(i).getText()));
 
                     Dijkstra path = new Dijkstra(tree);
-                    path.dijkstra(start);
+                    path.tree(start);
                     ByteArrayOutputStream output = new ByteArrayOutputStream();
                     System.setOut(new PrintStream(output));
                     path.printPath(end);
