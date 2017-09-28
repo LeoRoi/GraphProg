@@ -7,13 +7,15 @@ import java.util.TreeSet;
 
 /**
  * Dijkstra shortest path algorithm
+ * https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
  */
 public class Dijkstra {
+    private Map<String, Node> map; // HashMap <key, value>
+    public boolean ok = true; // status indicator
 
-    // declare a map with edges & nodes
-    private Map<String, Node> map;
-    public boolean ok = true;
-
+    /**
+     * single connection
+     */
     public static class Edge {
         String from, to;
         int weight;
@@ -26,13 +28,13 @@ public class Dijkstra {
     }
 
     /**
-     * One vertex of the map, complete with mappings to neighbouring vertices
+     * single graph-node
      */
     public static class Node implements Comparable<Node> {
         String name;
         int weight = Integer.MAX_VALUE;
         Node previous = null;
-        Map<Node, Integer> neighbors = new HashMap<>();
+        Map<Node, Integer> neighbors = new HashMap<>(); // other nodes & their distances
 
         Node(String name) {
             this.name = name;
@@ -66,7 +68,7 @@ public class Dijkstra {
 
     /**
      * init map
-     * @param edges all connections
+     * @param edges holds all connections
      */
     public Dijkstra(Edge[] edges) {
         map = new HashMap<>(edges.length);
@@ -81,7 +83,7 @@ public class Dijkstra {
 
         // find neighbors
         for (Edge temp : edges) {
-            map.get(temp.from).neighbors.put(map.get(temp.to), temp.weight);
+            map.get(temp.from).neighbors.put( map.get(temp.to), temp.weight );
         }
     }
 
