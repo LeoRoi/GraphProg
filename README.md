@@ -1,12 +1,14 @@
 # GraphProg
-Compose &amp; manage directed networks, find the shortest path with Dijkstra's algorithm
+Compose and manage directed networks, find the shortest path with Dijkstra's algorithm
 
 Features:
-  - create v del new nodes
+  - create or remove nodes
   - (dis)connect them
-  - save v load graphs
+  - save or load whole graphs
   - create random graphs
-  - find & print the shortest path
-  - zoom in & out
+  - find and the shortest path
+  - zoom in and out
   
 1.ser is a sample graph with 9 nodes.
+<br>
+Start GraphProg.jar to play.
